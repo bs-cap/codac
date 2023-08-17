@@ -14,3 +14,7 @@ def rename_column(df: DataFrame, values: dict) -> DataFrame:
 
 def delete_column(df: DataFrame, column_name: str) -> DataFrame:
     return df.drop(column_name)
+
+
+def join_dataframes(left_df: DataFrame, right_df: DataFrame, column: str) -> DataFrame:
+    return left_df.join(right_df, "id")

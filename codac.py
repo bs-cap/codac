@@ -1,7 +1,7 @@
 import argparse
 import logging
-from logging.handlers import TimedRotatingFileHandler
 import os
+from logging.handlers import TimedRotatingFileHandler
 from pathlib import Path
 
 from pyspark.sql import SparkSession
@@ -13,10 +13,10 @@ from libs.io_operations import *
 logs_path = "logs"
 Path(logs_path).mkdir(parents=True, exist_ok=True)
 rotator = TimedRotatingFileHandler(
-    os.path.join(logs_path, "codac.log"), 
-    when="H", 
-    interval=0,
-    backupCount=5, 
+    os.path.join(logs_path, "codac.log"),
+    when="H",
+    interval=1,
+    backupCount=5,
     encoding="utf-8",
     utc=True,
 )
@@ -37,9 +37,9 @@ def process_data(client_data_path, financial_data_path, countries):
     financial_df = read_csv_file(financial_data_path)
     assert client_df.columns != financial_df.columns, "Both source files seem to have similar content."
     logger.info("processing data")
-    final_df = client_df.join(financial_df, "id")
+    final_df = join_dataframes(client_df, financial_df, "id")
     final_df = filter_dataframe(final_df, "country", countries)
-    final_df = delete_column("country")
+    final_df = delete_column(final_df, "country")
     final_df = rename_column(
         final_df,
         dict(

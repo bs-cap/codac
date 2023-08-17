@@ -1,5 +1,7 @@
 import logging
 import os
+from pathlib import Path
+
 from pyspark.sql import SparkSession
 from pyspark.sql.dataframe import DataFrame
 
@@ -28,7 +30,7 @@ def read_csv_file(path: str) -> DataFrame:
                 f"{', '.join(DATASET_ONE_COLUMNS)} or \
                 {', '.join(DATASET_TWO_COLUMNS)} \
                 columns are required"
-                )
+            )
     logger.info("cleaning DataFrame")
     for column in set(df.columns) - columns:
         df = df.drop(column)
@@ -37,5 +39,7 @@ def read_csv_file(path: str) -> DataFrame:
 
 def write_csv_file(data: DataFrame) -> None:
     logger.info("writing data to file")
-    data.toPandas().to_csv(os.path.join("client_data", "dataset.csv"), index=False)
+    output_path = "client_data"
+    Path(output_path).mkdir(parents=True, exist_ok=True)
+    data.toPandas().to_csv(os.path.join(output_path, "dataset.csv"), index=False)
     logger.info("file saved")
