@@ -1,2 +1,3 @@
 pandas
-pyspark
+pyspark==3.3.2
+chispa

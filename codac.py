@@ -10,6 +10,15 @@ from libs.dataset_operations import *
 from libs.io_operations import *
 
 
+COLUMNS = dict(
+    client_data={"id", "email", "country"},
+    financial_data={"id", "btc_a", "cc_t"},
+)
+NEW_NAMES = dict(
+        id="client_identifier",
+        btc_a="bitcoin_address",
+        cc_t="credit_card_type",
+    )
 logs_path = "logs"
 Path(logs_path).mkdir(parents=True, exist_ok=True)
 rotator = TimedRotatingFileHandler(
@@ -27,44 +36,52 @@ logging.basicConfig(
 logger = logging.getLogger("codac")
 
 
-def process_data(client_data_path, financial_data_path, countries):
+def process_data(
+        first_file_path: str, 
+        first_file_columns: List[str],
+        second_file_path: str, 
+        second_file_columns: List[str],
+        join_on_column: str,
+        filter_on_column: str,
+        countries: List[str], 
+        new_column_names: dict
+        ) -> None:
     """
     """
     logger.info("process data procedure started")
     spark = SparkSession.builder.master("local").appName("codac").getOrCreate()
     logger.info("reading data")
-    client_df = read_csv_file(client_data_path)
-    financial_df = read_csv_file(financial_data_path)
-    assert client_df.columns != financial_df.columns, "Both source files seem to have similar content."
+    first_df = read_csv_file(first_file_path, first_file_columns)
+    second_df = read_csv_file(second_file_path, second_file_columns)
     logger.info("processing data")
-    final_df = join_dataframes(client_df, financial_df, "id")
-    final_df = filter_dataframe(final_df, "country", countries)
-    final_df = delete_column(final_df, "country")
-    final_df = rename_column(
-        final_df,
-        dict(
-            id="client_identifier",
-            btc_a="bitcoin_address",
-            cc_t="credit_card_type",
-        )
-    )
-    logger.info("data processed")
+    final_df = join_dataframes(first_df, second_df, join_on_column)
+    final_df = filter_dataframe(final_df, filter_on_column, countries)
+    final_df = rename_column(final_df, new_column_names)
     logger.info("saving data")
     write_csv_file(final_df)
     spark.stop()
-    logger.info("process data procedure procedure finished")
+    logger.info("process data procedure finished")
 
 
 if __name__ == "__main__":
     logger.info("application started")
     parser = argparse.ArgumentParser(description='Codac assesment.')
-    parser.add_argument("one", type=str, help="the first data file")
-    parser.add_argument("two", type=str, help="the second data file")
+    parser.add_argument("client_data", type=str, help="client data file")
+    parser.add_argument("financial_data", type=str, help="financial data file")
     parser.add_argument(
         "countries",
         nargs='+',
         help="list of countries, use quotes for names with spaces"
     )
     args = parser.parse_args()
-    process_data(args.one, args.two, args.countries)
+    process_data(
+        args.client_data, 
+        COLUMNS["client_data"], 
+        args.financial_data, 
+        COLUMNS["financial_data"], 
+        "id",
+        "country",
+        args.countries, 
+        NEW_NAMES
+        )
     logger.info("application stopped")

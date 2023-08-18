@@ -1,5 +1,3 @@
 .vscode/
 */__pycache__
-client_data/
-data/
 logs/

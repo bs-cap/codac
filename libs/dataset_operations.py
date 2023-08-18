@@ -12,9 +12,5 @@ def rename_column(df: DataFrame, values: dict) -> DataFrame:
     return df.select([col(key).alias(value) for key, value in values.items()])
 
 
-def delete_column(df: DataFrame, column_name: str) -> DataFrame:
-    return df.drop(column_name)
-
-
 def join_dataframes(left_df: DataFrame, right_df: DataFrame, column: str) -> DataFrame:
-    return left_df.join(right_df, "id")
+    return left_df.join(right_df, column)
