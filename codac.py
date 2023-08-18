@@ -3,6 +3,7 @@ import logging
 import os
 from logging.handlers import TimedRotatingFileHandler
 from pathlib import Path
+from typing import List, Set
 
 from pyspark.sql import SparkSession
 
@@ -38,16 +39,36 @@ logger = logging.getLogger("codac")
 
 def process_data(
         first_file_path: str, 
-        first_file_columns: List[str],
+        first_file_columns: Set[str],
         second_file_path: str, 
-        second_file_columns: List[str],
+        second_file_columns: Set[str],
         join_on_column: str,
         filter_on_column: str,
-        countries: List[str], 
+        values: List[str], 
         new_column_names: dict,
         output_path: str,
         ) -> None:
     """
+    ==============
+    Data processor
+    ==============
+    Main function. Processing source data from two files and saving it to one result file.
+
+    Parameters
+    ----------
+    * first_file_path - full/relative path to the first CSV file
+    * first_file_columns - set of column names to be retrieved from the first source file
+    * second_file_path - full/relative path to the second CSV file
+    * second_file_columns - set of column names to be retrieved from the second source file
+    * join_on_column - name of the column to be used as identifier for joining data from both source files
+    * filter_on_column - name of the column to filter values in
+    * values - list of the values to be selected from DataFrame
+    * new_column_names - dictionary with old and new column names
+    * output_path - full/relative path with file name to save result file to
+
+    Returns
+    -------
+    Nothing
     """
     logger.info("process data procedure started")
     logger.info("reading data")
@@ -55,7 +76,7 @@ def process_data(
     second_df = read_csv_file(second_file_path, second_file_columns)
     logger.info("processing data")
     final_df = join_dataframes(first_df, second_df, join_on_column)
-    final_df = filter_dataframe(final_df, filter_on_column, countries)
+    final_df = filter_dataframe(final_df, filter_on_column, values)
     final_df = rename_column(final_df, new_column_names)
     logger.info("saving data")
     write_csv_file(final_df, output_path)
@@ -63,10 +84,31 @@ def process_data(
 
 
 if __name__ == "__main__":
+    """
+    ==============
+    Script invoker
+    ==============
+    Used when script is called directly from command line. After gathering all necessary
+    data scripts calls ``process_data`` function.
+
+    Usage
+    -----
+    python codac.py [-h] client_data financial_data countries [countries ...]
+
+    Positional arguments (required)
+    -------------------------------
+    * client_data - path to client data file
+    * financial_data - path to financial data file
+    * countries - list of countries, use quotes for names with spaces
+
+    Optional arguments
+    ------------------
+    -h, --help - show help message and exit
+    """
     logger.info("application started")
     parser = argparse.ArgumentParser(description='Codac assesment.')
-    parser.add_argument("client_data", type=str, help="client data file")
-    parser.add_argument("financial_data", type=str, help="financial data file")
+    parser.add_argument("client_data", type=str, help="path to client data file")
+    parser.add_argument("financial_data", type=str, help="path to financial data file")
     parser.add_argument(
         "countries",
         nargs='+',
