@@ -24,9 +24,9 @@ def read_csv_file(path: str, columns: set) -> DataFrame:
     return df
 
 
-def write_csv_file(data: DataFrame) -> None:
+def write_csv_file(data: DataFrame, path: str) -> None:
     logger.info("writing data to file")
-    output_path = "client_data"
-    Path(output_path).mkdir(parents=True, exist_ok=True)
-    data.toPandas().to_csv(os.path.join(output_path, "dataset.csv"), index=False)
+    output_path = Path(path)
+    Path(output_path.parent).mkdir(parents=True, exist_ok=True)
+    data.toPandas().to_csv(output_path, index=False)
     logger.info("file saved")

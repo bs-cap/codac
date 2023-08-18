@@ -44,12 +44,12 @@ def process_data(
         join_on_column: str,
         filter_on_column: str,
         countries: List[str], 
-        new_column_names: dict
+        new_column_names: dict,
+        output_path: str,
         ) -> None:
     """
     """
     logger.info("process data procedure started")
-    spark = SparkSession.builder.master("local").appName("codac").getOrCreate()
     logger.info("reading data")
     first_df = read_csv_file(first_file_path, first_file_columns)
     second_df = read_csv_file(second_file_path, second_file_columns)
@@ -58,8 +58,7 @@ def process_data(
     final_df = filter_dataframe(final_df, filter_on_column, countries)
     final_df = rename_column(final_df, new_column_names)
     logger.info("saving data")
-    write_csv_file(final_df)
-    spark.stop()
+    write_csv_file(final_df, output_path)
     logger.info("process data procedure finished")
 
 
@@ -74,6 +73,7 @@ if __name__ == "__main__":
         help="list of countries, use quotes for names with spaces"
     )
     args = parser.parse_args()
+    spark = SparkSession.builder.master("local").appName("codac").getOrCreate()
     process_data(
         args.client_data, 
         COLUMNS["client_data"], 
@@ -82,6 +82,8 @@ if __name__ == "__main__":
         "id",
         "country",
         args.countries, 
-        NEW_NAMES
+        NEW_NAMES,
+        os.path.join("client_data", "dataset.csv"),
         )
+    spark.stop()
     logger.info("application stopped")
