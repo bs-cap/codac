@@ -38,6 +38,7 @@ jobs:
       run: |
         cd codac
         python -m unittest
+        cd ..
 
     - name: Create package
       run: |
