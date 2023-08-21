@@ -1,4 +1,5 @@
 import os
+import shutil
 import unittest
 
 from chispa.dataframe_comparer import assert_df_equality
@@ -18,7 +19,7 @@ class Tests(unittest.TestCase):
         cls.spark.stop()
         full_file_path = os.path.join("tests", "full.csv")
         if os.path.exists(full_file_path):
-            os.remove(full_file_path)
+            shutil.rmtree(full_file_path, ignore_errors=True)
 
     def test_process_data(self):
         process_data(

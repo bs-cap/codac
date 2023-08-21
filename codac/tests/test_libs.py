@@ -1,4 +1,5 @@
 import os
+import shutil
 import unittest
 
 from chispa.dataframe_comparer import assert_df_equality
@@ -24,7 +25,7 @@ class Tests(unittest.TestCase):
         cls.spark.stop()
         test_file_path = os.path.join("tests", "test.csv")
         if os.path.exists(test_file_path):
-            os.remove(test_file_path)
+            shutil.rmtree(test_file_path, ignore_errors=True)
 
     def test_column_rename(self):
         result_df = rename_column(self.test_df, {"name": "test_name"})
