@@ -42,4 +42,4 @@ jobs:
 
     - name: Create package
       run: |
-        python  .\setup.py sdist    
+        python setup.py sdist    
