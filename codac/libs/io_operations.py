@@ -6,10 +6,12 @@ from pyspark.sql.dataframe import DataFrame
 from pyspark.sql.utils import AnalysisException
 
 
-logger = logging.getLogger("codac")
-
-
-def read_csv_file(path: str, columns: set, session: SparkSession) -> DataFrame:
+def read_csv_file(
+        path: str, 
+        columns: set, 
+        session: SparkSession, 
+        logger: logging.Logger=logging.getLogger("")
+        ) -> DataFrame:
     """
     ============================
     Read DataFrame from CSV file
@@ -22,6 +24,7 @@ def read_csv_file(path: str, columns: set, session: SparkSession) -> DataFrame:
     * path - full/relative path to file with filename
     * columns - list of columns which are required
     * session - PySpark Session
+    * logger - logger instance
 
     Returns
     -------
@@ -46,7 +49,11 @@ def read_csv_file(path: str, columns: set, session: SparkSession) -> DataFrame:
     return df
 
 
-def write_csv_file(data: DataFrame, path: str) -> None:
+def write_csv_file(
+        data: DataFrame, 
+        path: str, 
+        logger:logging.Logger=logging.getLogger("")
+        ) -> None:
     """
     ===========================
     Write DataFrame to CSV file
@@ -58,6 +65,7 @@ def write_csv_file(data: DataFrame, path: str) -> None:
     ----------
     * data - PySpark DataFrame with data to be saved
     * path - full/relative path to file with filename, path is created if does not exist
+    * logger - logger instance
 
     Returns
     -------

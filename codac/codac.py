@@ -49,6 +49,7 @@ def process_data(
         new_column_names: dict,
         output_path: str,
         session: SparkSession,
+        logger:logging.Logger=logging.getLogger("")
         ) -> None:
     """
     ==============
@@ -67,6 +68,8 @@ def process_data(
     * values - list of the values to be selected from DataFrame
     * new_column_names - dictionary with old and new column names
     * output_path - full/relative path with file name to save result file to
+    * session - PySpark Session
+    * logger - logger instance
 
     Returns
     -------
@@ -130,6 +133,7 @@ if __name__ == "__main__":
             NEW_NAMES,
             os.path.join("client_data", "dataset.csv"),
             spark,
+            logger,
             )
     except AssertionError:
         print("Invalid input file format")
