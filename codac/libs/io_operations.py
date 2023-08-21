@@ -3,12 +3,13 @@ from pathlib import Path
 
 from pyspark.sql import SparkSession
 from pyspark.sql.dataframe import DataFrame
+from pyspark.sql.utils import AnalysisException
 
 
 logger = logging.getLogger("codac")
 
 
-def read_csv_file(path: str, columns: set) -> DataFrame:
+def read_csv_file(path: str, columns: set, session: SparkSession) -> DataFrame:
     """
     ============================
     Read DataFrame from CSV file
@@ -20,26 +21,32 @@ def read_csv_file(path: str, columns: set) -> DataFrame:
     ----------
     * path - full/relative path to file with filename
     * columns - list of columns which are required
+    * session - PySpark Session
 
     Returns
     -------
     PySpark DataFrame with data from file limited to given columns
     """
     logger.info(f"creating DataFrame from file {path}")
-    df = SparkSession.getActiveSession().read.csv(path, header=True)
-    logger.info("checking DataFrame format")
     try:
+        df = session.read.csv(path, header=True)
+        logger.info("checking DataFrame format")
         assert columns <= set(df.columns)
+    except AnalysisException:
+        logger.error(f"file {path} does not exist")
+        logger.error("data processing failed, processing terminated")
+        raise
     except AssertionError:
-        logger.error(f"file {path} structure is invalid, {columns} columns are required")
-        logger.error("data processing failed, application terminated")
+        logger.error(f"file {path} structure is invalid, {', '.join(columns)} columns are required")
+        logger.error("data processing failed, processing terminated")
+        raise
     logger.info("cleaning DataFrame")
     for column in set(df.columns) - columns:
         df = df.drop(column)
     return df
 
 
-def write_csv_file(data: DataFrame, path: str) -> None:
+def write_csv_file(data: DataFrame, path: str, session: SparkSession) -> None:
     """
     ===========================
     Write DataFrame to CSV file
@@ -51,6 +58,7 @@ def write_csv_file(data: DataFrame, path: str) -> None:
     ----------
     * data - PySpark DataFrame with data to be saved
     * path - full/relative path to file with filename, path is created if does not exist
+    * session - PySpark Session
 
     Returns
     -------

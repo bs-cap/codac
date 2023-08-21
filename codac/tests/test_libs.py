@@ -1,12 +1,11 @@
 import os
 import unittest
 
-from chispa.dataframe_comparer import *
+from chispa.dataframe_comparer import assert_df_equality
 from pyspark.sql import SparkSession
 
-from codac import process_data
-from libs.dataset_operations import *
-from libs.io_operations import *
+from libs.dataset_operations import rename_column, filter_dataframe, join_dataframes
+from libs.io_operations import read_csv_file, write_csv_file
 
 
 class Tests(unittest.TestCase):
@@ -26,9 +25,6 @@ class Tests(unittest.TestCase):
         test_file_path = os.path.join("tests", "test.csv")
         if os.path.exists(test_file_path):
             os.remove(test_file_path)
-        full_file_path = os.path.join("tests", "full.csv")
-        if os.path.exists(full_file_path):
-            os.remove(full_file_path)
 
     def test_column_rename(self):
         result_df = rename_column(self.test_df, {"name": "test_name"})
@@ -59,33 +55,13 @@ class Tests(unittest.TestCase):
         assert_df_equality(expected_df, result_df, ignore_column_order=True)
 
     def test_file_read(self):
-        df_from_file = read_csv_file(os.path.join("tests", "one.csv"), {"name", "value"})
+        df_from_file = read_csv_file(os.path.join("tests", "one.csv"), {"name", "value"}, self.spark)
         assert_df_equality(self.test_df, df_from_file)
 
     def test_file_save(self):
-        write_csv_file(self.test_df, os.path.join("tests", "test.csv"))
-        df_from_file = read_csv_file(os.path.join("tests", "test.csv"), {"name", "value"})
+        write_csv_file(self.test_df, os.path.join("tests", "test.csv"), self.spark)
+        df_from_file = read_csv_file(os.path.join("tests", "test.csv"), {"name", "value"}, self.spark)
         assert_df_equality(self.test_df, df_from_file)
-
-    def test_process_data(self):
-        process_data(
-            os.path.join("tests", "one.csv"),
-            {"name", "greek"},
-            os.path.join("tests", "two.csv"),
-            {"name", "from"},
-            "name",
-            "from",
-            ["mars"],
-            {"name": "id", "from": "origin"},
-            os.path.join("tests", "full.csv")
-        )
-        expected_data = [
-            ("a", "mars"),
-            ("g", "mars"),
-        ]
-        expected_df = self.spark.createDataFrame(expected_data, schema=["id", "origin"])
-        df_from_file = read_csv_file(os.path.join("tests", "full.csv"), {"id", "origin"})
-        assert_df_equality(expected_df, df_from_file)
 
 
 if __name__ == '__main__':

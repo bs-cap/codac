@@ -6,9 +6,10 @@ from pathlib import Path
 from typing import List, Set
 
 from pyspark.sql import SparkSession
+from pyspark.sql.utils import AnalysisException
 
-from libs.dataset_operations import *
-from libs.io_operations import *
+from libs.dataset_operations import filter_dataframe, join_dataframes, rename_column
+from libs.io_operations import read_csv_file, write_csv_file
 
 
 COLUMNS = dict(
@@ -47,6 +48,7 @@ def process_data(
         values: List[str], 
         new_column_names: dict,
         output_path: str,
+        session: SparkSession,
         ) -> None:
     """
     ==============
@@ -72,14 +74,14 @@ def process_data(
     """
     logger.info("process data procedure started")
     logger.info("reading data")
-    first_df = read_csv_file(first_file_path, first_file_columns)
-    second_df = read_csv_file(second_file_path, second_file_columns)
+    first_df = read_csv_file(first_file_path, first_file_columns, session)
+    second_df = read_csv_file(second_file_path, second_file_columns, session)
     logger.info("processing data")
     final_df = join_dataframes(first_df, second_df, join_on_column)
     final_df = filter_dataframe(final_df, filter_on_column, values)
     final_df = rename_column(final_df, new_column_names)
     logger.info("saving data")
-    write_csv_file(final_df, output_path)
+    write_csv_file(final_df, output_path, session)
     logger.info("process data procedure finished")
 
 
@@ -116,16 +118,27 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
     spark = SparkSession.builder.master("local").appName("codac").getOrCreate()
-    process_data(
-        args.client_data, 
-        COLUMNS["client_data"], 
-        args.financial_data, 
-        COLUMNS["financial_data"], 
-        "id",
-        "country",
-        args.countries, 
-        NEW_NAMES,
-        os.path.join("client_data", "dataset.csv"),
-        )
-    spark.stop()
+    try:
+        process_data(
+            args.client_data, 
+            COLUMNS["client_data"], 
+            args.financial_data, 
+            COLUMNS["financial_data"], 
+            "id",
+            "country",
+            args.countries, 
+            NEW_NAMES,
+            os.path.join("client_data", "dataset.csv"),
+            spark,
+            )
+    except AssertionError:
+        print("Invalid input file format")
+        print("Application failed")
+    except AnalysisException:
+        print("Input file does not exist")
+        print("Application failed")
+    else:
+        print("Application finished successfully")
+    finally:
+        spark.stop()
     logger.info("application stopped")
