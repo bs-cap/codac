@@ -36,6 +36,7 @@ jobs:
         
     - name: Test with unittest
       run: |
+        cd codac
         python -m unittest
 
     - name: Create package
