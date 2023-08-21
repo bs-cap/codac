@@ -46,7 +46,7 @@ def read_csv_file(path: str, columns: set, session: SparkSession) -> DataFrame:
     return df
 
 
-def write_csv_file(data: DataFrame, path: str, session: SparkSession) -> None:
+def write_csv_file(data: DataFrame, path: str) -> None:
     """
     ===========================
     Write DataFrame to CSV file
@@ -58,7 +58,6 @@ def write_csv_file(data: DataFrame, path: str, session: SparkSession) -> None:
     ----------
     * data - PySpark DataFrame with data to be saved
     * path - full/relative path to file with filename, path is created if does not exist
-    * session - PySpark Session
 
     Returns
     -------
@@ -67,5 +66,5 @@ def write_csv_file(data: DataFrame, path: str, session: SparkSession) -> None:
     logger.info("writing data to file")
     output_path = Path(path)
     Path(output_path.parent).mkdir(parents=True, exist_ok=True)
-    data.toPandas().to_csv(output_path, index=False)
+    data.write.option("header", True).mode("overwrite").csv(path)
     logger.info("file saved")

@@ -59,7 +59,7 @@ class Tests(unittest.TestCase):
         assert_df_equality(self.test_df, df_from_file)
 
     def test_file_save(self):
-        write_csv_file(self.test_df, os.path.join("tests", "test.csv"), self.spark)
+        write_csv_file(self.test_df, os.path.join("tests", "test.csv"))
         df_from_file = read_csv_file(os.path.join("tests", "test.csv"), {"name", "value"}, self.spark)
         assert_df_equality(self.test_df, df_from_file)
 

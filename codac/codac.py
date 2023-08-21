@@ -81,7 +81,7 @@ def process_data(
     final_df = filter_dataframe(final_df, filter_on_column, values)
     final_df = rename_column(final_df, new_column_names)
     logger.info("saving data")
-    write_csv_file(final_df, output_path, session)
+    write_csv_file(final_df, output_path)
     logger.info("process data procedure finished")
 
 
