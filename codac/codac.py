@@ -131,7 +131,7 @@ if __name__ == "__main__":
             "country",
             args.countries, 
             NEW_NAMES,
-            os.path.join("client_data"),
+            os.path.join("client_data", "dataset.csv"),
             spark,
             logger,
             )

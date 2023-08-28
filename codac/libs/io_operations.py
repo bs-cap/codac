@@ -32,7 +32,7 @@ def read_csv_file(
     """
     logger.info(f"creating DataFrame from file {path}")
     try:
-        df = session.read.csv(path, header=True)
+        df = session.read.csv(path, header=True, sep=',')
         logger.info("checking DataFrame format")
         assert columns <= set(df.columns)
     except AnalysisException:
