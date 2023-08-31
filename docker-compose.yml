@@ -1,0 +1,20 @@
+services:
+  spark:
+    image: apache/spark-py
+    ports:
+      - "4040:4040"
+      - "15002:15002"
+    volumes:
+      - ./data:/data
+      - ./logs:/logs
+      - ./client_data:/client_data
+    user: root
+    command: bash -c "
+        /opt/spark/sbin/start-connect-server.sh --packages org.apache.spark:spark-connect_2.12:3.4.0 
+        && tail -f /opt/spark/logs/spark--org.apache.spark.sql.connect.service.SparkConnectServer-1-*.out
+      "
+
+volumes:
+  data:
+  logs:
+  client_data:

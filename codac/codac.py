@@ -120,7 +120,7 @@ if __name__ == "__main__":
         help="list of countries, use quotes for names with spaces"
     )
     args = parser.parse_args()
-    spark = SparkSession.builder.master("local").appName("codac").getOrCreate()
+    spark = SparkSession.builder.remote("sc://localhost:15002").appName("codac").getOrCreate()
     try:
         process_data(
             args.client_data, 
