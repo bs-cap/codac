@@ -75,4 +75,4 @@ def write_csv_file(
     output_path = Path(path)
     Path(output_path.parent).mkdir(parents=True, exist_ok=True)
     data.write.option("header", True).mode("overwrite").csv(path)
-    logger.info("file saved")
+    logger.info(f"file saved to {path}")

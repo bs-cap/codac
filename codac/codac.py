@@ -2,7 +2,7 @@ import argparse
 import logging
 import os
 from logging.handlers import TimedRotatingFileHandler
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 from typing import List, Set
 
 from pyspark.sql import SparkSession
@@ -131,7 +131,7 @@ if __name__ == "__main__":
             "country",
             args.countries, 
             NEW_NAMES,
-            os.path.join("client_data", "dataset.csv"),
+            PurePosixPath('/').joinpath("client_data", "dataset.csv").as_posix(),
             spark,
             logger,
             )
