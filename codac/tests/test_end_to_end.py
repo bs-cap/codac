@@ -10,13 +10,11 @@ from libs.io_operations import read_csv_file
 
 
 class Tests(unittest.TestCase):
-    @classmethod
-    def setUp(cls) -> None:
-        cls.spark = SparkSession.builder.master("local").appName("chispa").getOrCreate()
+    def setUp(self) -> None:
+        self.spark = SparkSession.builder.master("local").appName("chispa").getOrCreate()
 
-    @classmethod
-    def tearDown(cls) -> None:
-        cls.spark.stop()
+    def tearDown(self) -> None:
+        self.spark.stop()
         full_file_path = os.path.join("tests", "full.csv")
         if os.path.exists(full_file_path):
             shutil.rmtree(full_file_path, ignore_errors=True)
