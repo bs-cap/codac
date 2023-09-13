@@ -10,19 +10,17 @@ from libs.io_operations import read_csv_file, write_csv_file
 
 
 class Tests(unittest.TestCase):
-    @classmethod
-    def setUp(cls) -> None:
-        cls.spark = SparkSession.builder.master("local").appName("chispa").getOrCreate()
-        cls.test_data = [
+    def setUp(self) -> None:
+        self.spark = SparkSession.builder.master("local").appName("chispa").getOrCreate()
+        self.test_data = [
             ("a", "1"),
             ("b", "2"),
             ("g", "3")
         ]
-        cls.test_df = cls.spark.createDataFrame(cls.test_data, schema=["name", "value"])
+        self.test_df = self.spark.createDataFrame(self.test_data, schema=["name", "value"])
 
-    @classmethod
-    def tearDown(cls) -> None:
-        cls.spark.stop()
+    def tearDown(self) -> None:
+        self.spark.stop()
         test_file_path = os.path.join("tests", "test.csv")
         if os.path.exists(test_file_path):
             shutil.rmtree(test_file_path, ignore_errors=True)
